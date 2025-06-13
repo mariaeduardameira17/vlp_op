@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Financeiro - Lançamentos</title>
+    <!-- Inclui o Tailwind CSS para estilização responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Define a fonte Inter para todo o documento -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212; /* Fundo mais escuro */
+            color: #e2e8f0; /* Cor do texto claro */
+        }
+        /* Estilização para o modal (se for usado futuramente) */
+        .modal {
+            display: none; /* Escondido por padrão */
+            position: fixed; /* Posição fixa na tela */
+            z-index: 1000; /* Acima de outros elementos */
+            left: 0;
+            top: 0;
+            width: 100%; /* Largura total */
+            height: 100%; /* Altura total */
+            overflow: auto; /* Adiciona scroll se o conteúdo for muito grande */
+            background-color: rgba(0,0,0,0.7); /* Fundo semi-transparente */
+            display: flex; /* Para centralizar o conteúdo */
+            justify-content: center; /* Centraliza horizontalmente */
+            align-items: center; /* Centraliza verticalmente */
+        }
+        .modal-content {
+            background-color: #2d3748; /* Cor de fundo do conteúdo do modal */
+            margin: auto; /* Margens automáticas para centralização */
+            padding: 24px;
+            border-radius: 8px; /* Cantos arredondados */
+            max-width: 90%; /* Largura máxima */
+            width: 400px; /* Largura padrão */
+            text-align: center; /* Centraliza o texto */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Sombra suave */
+        }
+        /* Oculta a seta para campos de número */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+    <!-- Container principal do aplicativo -->
+    <div class="max-w-4xl mx-auto bg-gray-800 rounded-lg shadow-xl p-6 md:p-8 lg:p-10">
+
+        <!-- Cabeçalho com informações do usuário e navegação -->
+        <header class="mb-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between mb-6">
+                <h1 class="text-2xl font-semibold text-gray-100 mb-4 sm:mb-0">
+                    Olá, Volupia
+                </h1>
+                <!-- Botão de autenticação removido -->
+            </div>
+
+            <!-- Botões de navegação entre "Novo Lançamento" e "Painel" -->
+            <nav class="flex justify-center bg-gray-700 rounded-md p-1">
+                <button id="new-launch-tab" class="flex-1 py-2 px-4 text-center rounded-md text-white font-medium bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+                    Novo Lançamento
+                </button>
+                <button id="dashboard-tab" class="flex-1 py-2 px-4 text-center rounded-md text-gray-300 hover:text-white transition-colors duration-200">
+                    Painel
+                </button>
+            </nav>
+        </header>
+
+        <!-- Seção de "Novo Lançamento" -->
+        <section id="new-launch-section" class="bg-red-800 p-6 rounded-lg shadow-md relative">
+            <h2 class="text-2xl font-bold text-gray-100 mb-6 text-center">NOVO LANÇAMENTO</h2>
+
+            <form id="transaction-form" class="space-y-4">
+                <div>
+                    <label for="transaction-type" class="block text-gray-100 text-sm font-bold mb-1">TIPO DE LANÇAMENTO</label>
+                    <select id="transaction-type" class="w-full p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Saída">Saída</option>
+                        <option value="Entrada">Entrada</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="transaction-date" class="block text-gray-100 text-sm font-bold mb-1">DATA</label>
+                    <input type="date" id="transaction-date" class="w-full p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+
+                <div>
+                    <label for="transaction-description" class="block text-gray-100 text-sm font-bold mb-1">DESCRIÇÃO</label>
+                    <input type="text" id="transaction-description" placeholder="Ex: Contribuição Aniver XX, Jóia," class="w-full p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+
+                <div>
+                    <label for="transaction-reference" class="block text-gray-100 text-sm font-bold mb-1">REFERÊNCIA</label>
+                    <input type="text" id="transaction-reference" placeholder="Ex: Nome da exala ou colocar ap" class="w-full p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label for="transaction-category" class="block text-gray-100 text-sm font-bold mb-1">CATEGORIA</label>
+                    <select id="transaction-category" class="w-full p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <option value="">Selecione uma categoria</option>
+                        <option value="Aniversário">Aniversário</option>
+                        <option value="Jóia">Jóia</option>
+                        <option value="Cachorro">Cachorro</option>
+                        <option value="Hospedagem">Hospedagem</option>
+                        <option value="NA">NA</option>
+                        <option value="Rendimentos">Rendimentos</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="transaction-value" class="block text-gray-100 text-sm font-bold mb-1">VALOR</label>
+                    <input type="number" id="transaction-value" placeholder="0.00" step="0.01" min="0" class="w-full p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-red-900 hover:bg-red-800 text-yellow-400 font-bold rounded-md transition-colors duration-200">
+                    Adicionar Transação
+                </button>
+            </form>
+        </section>
+
+        <!-- Seção do "Painel" (inicialmente oculta) -->
+        <section id="dashboard-section" class="bg-gray-700 p-6 rounded-lg shadow-md relative hidden">
+            <h2 class="text-2xl font-bold text-gray-100 mb-6 text-center">Painel de Fluxo de Caixa</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-green-600 p-6 rounded-md text-center shadow-lg">
+                    <p class="text-white text-lg font-medium">Total de Entradas</p>
+                    <p id="total-entries" class="text-white text-3xl font-bold mt-2">R$ 0.00</p>
+                </div>
+                <div class="bg-red-600 p-6 rounded-md text-center shadow-lg">
+                    <p class="text-white text-lg font-medium">Total de Saídas</p>
+                    <p id="total-exits" class="text-white text-3xl font-bold mt-2">R$ 0.00</p>
+                </div>
+                <div class="bg-blue-600 p-6 rounded-md text-center shadow-lg">
+                    <p class="text-white text-lg font-medium">Saldo Líquido</p>
+                    <p id="liquid-balance" class="text-white text-3xl font-bold mt-2">R$ 0.00</p>
+                </div>
+            </div>
+
+            <!-- Seção de "Detalhe por Categoria" (placeholder) -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold text-gray-100 mb-4">Detalhe por Categoria</h3>
+                <p class="text-gray-400">Nenhum detalhe por categoria com os filtros atuais.</p>
+            </div>
+
+            <!-- Seção de "Filtrar Transações" -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold text-gray-100 mb-4">Filtrar Transações</h3>
+                <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                    <select id="filter-type" class="flex-1 p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Todos">Todos os Tipos</option>
+                        <option value="Entrada">Entrada</option>
+                        <option value="Saída">Saída</option>
+                    </select>
+                    <select id="filter-category" class="flex-1 p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Todas">Todas as Categorias</option>
+                        <option value="Aniversário">Aniversário</option>
+                        <option value="Jóia">Jóia</option>
+                        <option value="Cachorro">Cachorro</option>
+                        <option value="Hospedagem">Hospedagem</option>
+                        <option value="NA">NA</option>
+                        <option value="Rendimentos">Rendimentos</option>
+                    </select>
+                </div>
+                <!-- Filtro de Descrição -->
+                <select id="filter-description" class="w-full p-3 rounded-md bg-gray-600 text-white border border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+                    <option value="Todas">Todas as Descrições</option>
+                    <!-- Descrições serão preenchidas dinamicamente pelo JS -->
+                </select>
+                <button id="clear-filters-btn" class="w-full py-2 bg-gray-600 hover:bg-gray-500 text-white font-medium rounded-md transition-colors duration-200">
+                    Limpar Filtros
+                </button>
+            </div>
+
+            <!-- Histórico de Transações -->
+            <div>
+                <h3 class="text-xl font-semibold text-gray-100 mb-4">Histórico de Transações (<span id="transaction-count">0</span> itens)</h3>
+                <div id="transactions-list" class="space-y-4">
+                    <!-- Transações serão injetadas aqui pelo JavaScript -->
+                    <p id="no-transactions-message" class="text-gray-400 text-center">Nenhuma transação encontrada com os filtros atuais.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Importações do Firebase SDK e o script principal do aplicativo -->
+    <script type="module">
+        // Definição da sua configuração Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCuTM4d8Ihk933QJE9wdLRzHRLDvHK8PFI",
+            authDomain: "volupia-7a6bb.firebaseapp.com",
+            projectId: "volupia-7a6bb",
+            storageBucket: "volupia-7a6bb.firebasestorage.app",
+            messagingSenderId: "470488975649",
+            appId: "1:470488975649:web:64c9b5d5dbfeda5350d660",
+            measurementId: "G-Q2C0R6Y2MX"
+        };
+
+        // Deriva o appId do seu objeto de configuração
+        const appId = firebaseConfig.appId; 
+
+        // Importa os módulos necessários do Firebase (versão 11.9.1)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, orderBy, doc, setDoc, getDoc, deleteDoc, updateDoc, where } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js"; // Importando getAnalytics
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const analytics = getAnalytics(app); // Inicializando o Analytics
+
+        let currentUserId = null;
+        let isAuthReady = false; // Flag para indicar se a autenticação foi concluída e o app está pronto para dados
+        const fixedCategories = ["Aniversário", "Jóia", "Cachorro", "Hospedagem", "NA", "Rendimentos"];
+        let allDescriptions = new Set(); 
+
+        // --- Elementos do DOM ---
+        const newLaunchTab = document.getElementById('new-launch-tab');
+        const dashboardTab = document.getElementById('dashboard-tab');
+        const newLaunchSection = document.getElementById('new-launch-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const transactionForm = document.getElementById('transaction-form');
+        const transactionType = document.getElementById('transaction-type');
+        const transactionDate = document.getElementById('transaction-date');
+        const transactionDescription = document.getElementById('transaction-description');
+        const transactionReference = document.getElementById('transaction-reference');
+        const transactionCategory = document.getElementById('transaction-category');
+        const transactionValue = document.getElementById('transaction-value');
+        const totalEntriesElement = document.getElementById('total-entries');
+        const totalExitsElement = document.getElementById('total-exits');
+        const liquidBalanceElement = document.getElementById('liquid-balance');
+        const transactionsList = document.getElementById('transactions-list');
+        const transactionCountElement = document.getElementById('transaction-count');
+        const noTransactionsMessage = document.getElementById('no-transactions-message');
+        // userDisplayName e authButton não existem mais no HTML, então suas referências podem ser removidas
+        // const userDisplayName = document.getElementById('user-display-name'); 
+        // const authButton = document.getElementById('auth-button');
+
+        // Modal de Login/Registro (referências removidas já que o modal não existe mais)
+        // const loginModal = document.getElementById('login-modal');
+        // const nicknameAuthForm = document.getElementById('nickname-auth-form');
+        // const authDisplayName = document.getElementById('auth-display-name');
+        // const enterBtn = document.getElementById('enter-btn');
+
+        // Filtros
+        const filterType = document.getElementById('filter-type');
+        const filterCategory = document.getElementById('filter-category');
+        const filterDescription = document.getElementById('filter-description');
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
+
+        /**
+         * A função showCustomModal agora apenas loga a mensagem no console, sem exibir um modal na UI.
+         */
+        function showCustomModal(message) {
+            console.log("Mensagem do aplicativo:", message);
+        }
+
+        // showLoginModal e hideLoginModal foram removidos já que o modal não existe mais.
+
+        /**
+         * Alterna a visibilidade entre as seções de Novo Lançamento e Painel.
+         * Aplica as classes de cor específicas para as abas selecionadas.
+         * @param {string} activeSection - A seção a ser ativada ('newLaunch' ou 'dashboard').
+         */
+        function switchSection(activeSection) {
+            // Garante que o usuário está autenticado e o nome está pronto antes de alternar
+            if (!isAuthReady) {
+                console.warn("App não está pronto para alternar seções. Autenticação pendente.");
+                return;
+            }
+
+            // Remove as classes de cor e texto do botão não selecionado
+            newLaunchTab.classList.remove('bg-red-900', 'text-yellow-400');
+            dashboardTab.classList.remove('bg-red-900', 'text-yellow-400');
+            newLaunchTab.classList.add('bg-gray-700', 'text-gray-300', 'hover:text-white');
+            dashboardTab.classList.add('bg-gray-700', 'text-gray-300', 'hover:text-white');
+
+
+            if (activeSection === 'newLaunch') {
+                newLaunchSection.classList.remove('hidden');
+                dashboardSection.classList.add('hidden');
+                // Aplica as classes de cor e texto para a aba selecionada (igual ao botão de adicionar transação)
+                newLaunchTab.classList.remove('bg-gray-700', 'text-gray-300');
+                newLaunchTab.classList.add('bg-red-900', 'text-yellow-400');
+            } else if (activeSection === 'dashboard') {
+                dashboardSection.classList.remove('hidden');
+                newLaunchSection.classList.add('hidden');
+                // Aplica as classes de cor e texto para a aba selecionada (igual ao botão de adicionar transação)
+                dashboardTab.classList.remove('bg-gray-700', 'text-gray-300');
+                dashboardTab.classList.add('bg-red-900', 'text-yellow-400');
+            }
+        }
+
+        // --- Autenticação Firebase ---
+        // Funções createUserProfile e getUserProfile não são mais necessárias pois não haverá perfil dinâmico nem login/logout
+        // Elas foram mantidas aqui para que o código seja self-contained, mas poderiam ser removidas se não houver uso futuro.
+        async function createUserProfile(user, displayName) {
+            console.log("createUserProfile não é mais usado no fluxo atual.");
+            return true;
+        }
+
+        async function getUserProfile(uid) {
+            console.log("getUserProfile não é mais usado no fluxo atual.");
+            return null;
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                // currentUserName é fixo como "Volupia" ao salvar transações
+                // Não há userDisplayName no HTML para atualizar.
+                
+                if (!isAuthReady) {
+                    isAuthReady = true;
+                    setupFirestoreListeners();
+                    switchSection('newLaunch'); 
+                }
+            } else {
+                // Usuário deslogado. Tenta fazer login anônimo para manter a funcionalidade.
+                currentUserId = null;
+                isAuthReady = false;
+
+                try {
+                    await signInAnonymously(auth);
+                } catch (error) {
+                    console.error("Erro no login anônimo ao iniciar/restaurar sessão:", error);
+                    // Se o login anônimo falhar persistentemente, o app não funcionará com Firestore.
+                }
+            }
+        });
+
+        // nicknameAuthForm.addEventListener('submit') e authButton.addEventListener('click') foram removidos
+        // pois não há mais interação de login/logout pelo usuário.
+
+        // --- Funções do Firestore ---
+        async function addTransaction(transactionData) {
+            if (!isAuthReady || !currentUserId) { // currentUserName não precisa ser checado, pois é fixo para salvar
+                console.error("App não está pronto (usuário não autenticado). Não é possível adicionar transação.");
+                return;
+            }
+            try {
+                const transactionsCollectionRef = collection(db, `artifacts/${appId}/public/data/transactions`);
+                await addDoc(transactionsCollectionRef, {
+                    ...transactionData,
+                    timestamp: new Date().toISOString(),
+                    userId: currentUserId,
+                    userName: "Volupia" // Hardcoded "Volupia" para o nome do usuário que adiciona a transação
+                });
+                console.log("Transação adicionada com sucesso!");
+                transactionForm.reset();
+                transactionDate.value = new Date().toISOString().split('T')[0];
+                transactionValue.value = '';
+            } catch (e) {
+                console.error("Erro ao adicionar documento: ", e);
+            }
+        }
+
+        async function deleteTransaction(id) {
+            if (!isAuthReady) {
+                console.error("App não está pronto. Não é possível excluir transação.");
+                return;
+            }
+            try {
+                const transactionRef = doc(db, `artifacts/${appId}/public/data/transactions`, id);
+                await deleteDoc(transactionRef);
+                console.log("Transação excluída com sucesso!");
+            }
+            catch (e) {
+                console.error("Erro ao excluir documento: ", e);
+            }
+        }
+
+        function setupFirestoreListeners() {
+            if (!isAuthReady) {
+                console.warn("Autenticação não pronta para configurar listeners do Firestore.");
+                return;
+            }
+
+            const publicTransactionsRef = collection(db, `artifacts/${appId}/public/data/transactions`);
+            let q = query(publicTransactionsRef, orderBy('timestamp', 'desc'));
+
+            const selectedType = filterType.value;
+            const selectedCategory = filterCategory.value;
+            const selectedDescription = filterDescription.value;
+
+            if (selectedType !== 'Todos') {
+                q = query(q, where('type', '==', selectedType));
+            }
+            if (selectedCategory !== 'Todas') {
+                q = query(q, where('category', '==', selectedCategory));
+            }
+            if (selectedDescription !== 'Todas') {
+                q = query(q, where('description', '==', selectedDescription));
+            }
+
+            onSnapshot(q, (snapshot) => {
+                let totalEntries = 0;
+                let totalExits = 0;
+                const transactions = [];
+                allDescriptions.clear();
+                allDescriptions.add('Todas');
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    transactions.push({ id: doc.id, ...data });
+
+                    const value = parseFloat(data.value);
+                    if (data.type === 'Entrada') {
+                        totalEntries += value;
+                    } else if (data.type === 'Saída') {
+                        totalExits += value;
+                    }
+                    allDescriptions.add(data.description);
+                });
+
+                const liquidBalance = totalEntries - totalExits;
+
+                totalEntriesElement.textContent = `R$ ${totalEntries.toFixed(2).replace('.', ',')}`;
+                totalExitsElement.textContent = `R$ ${totalExits.toFixed(2).replace('.', ',')}`;
+                liquidBalanceElement.textContent = `R$ ${liquidBalance.toFixed(2).replace('.', ',')}`;
+                transactionCountElement.textContent = transactions.length;
+
+                renderTransactions(transactions);
+                populateDescriptionFilter();
+            }, (error) => {
+                console.error("Erro ao obter transações em tempo real:", error);
+            });
+        }
+
+        function populateDescriptionFilter() {
+            const currentSelectedDescription = filterDescription.value;
+            filterDescription.innerHTML = '';
+            allDescriptions.forEach(description => {
+                const option = document.createElement('option');
+                option.value = description === 'Todas' ? 'Todas' : description;
+                option.textContent = description === 'Todas' ? 'Todas as Descrições' : description;
+                filterDescription.appendChild(option);
+            });
+            if (allDescriptions.has(currentSelectedDescription)) {
+                filterDescription.value = currentSelectedDescription;
+            } else {
+                filterDescription.value = 'Todas';
+            }
+        }
+
+        function renderTransactions(transactions) {
+            transactionsList.innerHTML = '';
+
+            if (transactions.length === 0) {
+                noTransactionsMessage.classList.remove('hidden');
+                transactionsList.appendChild(noTransactionsMessage);
+            } else {
+                noTransactionsMessage.classList.add('hidden');
+                transactions.forEach(transaction => {
+                    const transactionItem = document.createElement('div');
+                    transactionItem.classList.add('bg-gray-600', 'p-4', 'rounded-md', 'shadow-sm', 'flex', 'flex-col', 'sm:flex-row', 'justify-between', 'items-start', 'sm:items-center');
+
+                    const valueColorClass = transaction.type === 'Entrada' ? 'text-green-400' : 'text-red-400';
+                    // Formata o valor para exibição (R$ X.XX)
+                    const displayValue = `R$ ${parseFloat(transaction.value).toFixed(2).replace('.', ',')}`;
+
+                    transactionItem.innerHTML = `
+                        <div>
+                            <p class="text-gray-200 font-medium">${transaction.description} (<span class="font-bold">${transaction.category}</span>)</p>
+                            <p class="text-gray-400 text-sm mt-1">Data: ${new Date(transaction.date).toLocaleDateString()} | Tipo: ${transaction.type}</p>
+                            ${transaction.reference ? `<p class="text-gray-400 text-sm mt-1">Ref: ${transaction.reference}</p>` : ''}
+                            <p class="text-gray-500 text-xs mt-1">Usuário: ${transaction.userName || 'Desconhecido'}</p> <!-- Removido (ID: ${transaction.userId}) -->
+                        </div>
+                        <div class="mt-2 sm:mt-0 flex gap-2">
+                            <p class="text-lg font-bold ${valueColorClass}">${displayValue}</p>
+                            <button class="delete-btn px-3 py-1 bg-red-700 hover:bg-red-800 text-white text-sm rounded-md" data-id="${transaction.id}">Excluir</button>
+                        </div>
+                    `;
+                    transactionsList.appendChild(transactionItem);
+
+                    transactionItem.querySelector('.delete-btn').addEventListener('click', () => deleteTransaction(transaction.id));
+                });
+            }
+        }
+
+        // --- Event Listeners ---
+        newLaunchTab.addEventListener('click', () => switchSection('newLaunch'));
+        dashboardTab.addEventListener('click', () => switchSection('dashboard'));
+
+        transactionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const value = parseFloat(transactionValue.value);
+
+            const transaction = {
+                type: transactionType.value,
+                date: transactionDate.value,
+                description: transactionDescription.value,
+                reference: transactionReference.value,
+                category: transactionCategory.value,
+                value: value
+            };
+
+            if (isNaN(transaction.value) || transaction.value <= 0) {
+                console.warn("Valor de transação inválido.");
+                return;
+            }
+
+            await addTransaction(transaction);
+        });
+
+        filterType.addEventListener('change', setupFirestoreListeners);
+        filterCategory.addEventListener('change', setupFirestoreListeners);
+        filterDescription.addEventListener('change', setupFirestoreListeners);
+        clearFiltersBtn.addEventListener('click', () => {
+            filterType.value = 'Todos';
+            filterCategory.value = 'Todas';
+            filterDescription.value = 'Todas';
+            setupFirestoreListeners();
+        });
+
+        // --- Inicialização ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            transactionDate.value = new Date().toISOString().split('T')[0];
+            transactionValue.value = '';
+
+            // Tenta fazer login anônimo imediatamente ao carregar o DOM.
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Erro no login anônimo inicial ao carregar a página:", error);
+            }
+        });
+    </script>
+</body>
+</html>
